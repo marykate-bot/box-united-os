@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-archivo: 'Archivo', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+
+  --color-navy: #0B1E39;
+  --color-navy-light: #152d54;
+  --color-brand: #2563EB;
+  --color-brand-light: #3b82f6;
+  --color-page: #EEF2F7;
+  --color-on-track: #16a34a;
+  --color-off-track: #dc2626;
+  --color-done: #6b7280;
+  --color-warning: #d97706;
+
+  --radius-card: 14px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-inter);
+  background-color: var(--color-page);
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-archivo);
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius-card);
+  box-shadow: 0 1px 3px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.05);
+}
+
+.needs-you-gradient {
+  background: linear-gradient(135deg, #0B1E39 0%, #1a3a6b 60%, #2563EB 100%);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-inter);
+}
+
+.status-pill.on-track {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-pill.off-track {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-pill.done {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.status-pill.todo {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.status-pill.in-progress {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+#root {
+  height: 100dvh;
+  display: flex;
+}
