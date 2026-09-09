@@ -80,6 +80,16 @@ h1, h2, h3, h4, h5, h6 {
   color: #b45309;
 }
 
+.status-pill.not-started {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-pill.goal-done {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 #root {
   height: 100dvh;
   display: flex;

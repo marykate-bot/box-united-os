@@ -5,6 +5,7 @@ import { useTasks } from '../../hooks/useTasks'
 
 interface Props {
   userId: string
+  readOnly?: boolean
 }
 
 const FREQUENCIES: { id: TaskFrequency; label: string }[] = [
@@ -13,7 +14,7 @@ const FREQUENCIES: { id: TaskFrequency; label: string }[] = [
   { id: 'monthly', label: 'Monthly' },
 ]
 
-export function TaskBoard({ userId }: Props) {
+export function TaskBoard({ userId, readOnly = false }: Props) {
   const [frequency, setFrequency] = useState<TaskFrequency>('daily')
   const { tasks, loading, addTask, toggleTask, deleteTask } = useTasks(userId, frequency)
   const [showAdd, setShowAdd] = useState(false)
@@ -35,16 +36,18 @@ export function TaskBoard({ userId }: Props) {
         <div className="flex items-center gap-2">
           <CheckSquare size={16} className="text-blue-600" />
           <h3 className="font-semibold text-gray-900 text-sm" style={{ fontFamily: 'Archivo, sans-serif' }}>
-            My Tasks
+            {readOnly ? 'Tasks' : 'My Tasks'}
           </h3>
         </div>
-        <button
-          onClick={() => setShowAdd(v => !v)}
-          className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
-        >
-          <Plus size={14} />
-          Add task
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setShowAdd(v => !v)}
+            className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <Plus size={14} />
+            Add task
+          </button>
+        )}
       </div>
 
       {/* Frequency toggle */}
@@ -65,7 +68,7 @@ export function TaskBoard({ userId }: Props) {
         ))}
       </div>
 
-      {showAdd && (
+      {!readOnly && showAdd && (
         <div className="card p-4 mb-3 border border-blue-100">
           <input
             autoFocus
@@ -105,16 +108,22 @@ export function TaskBoard({ userId }: Props) {
         <div className="space-y-2">
           {pending.map(task => (
             <div key={task.id} className="card px-4 py-3 flex items-center gap-3 group">
-              <button onClick={() => toggleTask(task.id, true)} className="shrink-0 text-gray-300 hover:text-blue-500 transition-colors">
-                <Square size={16} />
-              </button>
+              {readOnly ? (
+                <Square size={16} className="shrink-0 text-gray-300" />
+              ) : (
+                <button onClick={() => toggleTask(task.id, true)} className="shrink-0 text-gray-300 hover:text-blue-500 transition-colors">
+                  <Square size={16} />
+                </button>
+              )}
               <span className="text-sm text-gray-800 flex-1">{task.title}</span>
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
-              >
-                <Trash2 size={13} />
-              </button>
+              {!readOnly && (
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
             </div>
           ))}
           {done.length > 0 && (
@@ -122,16 +131,22 @@ export function TaskBoard({ userId }: Props) {
               <div className="text-xs text-gray-400 px-1 pt-2 pb-1 font-medium">Completed</div>
               {done.map(task => (
                 <div key={task.id} className="card px-4 py-3 flex items-center gap-3 group opacity-60">
-                  <button onClick={() => toggleTask(task.id, false)} className="shrink-0 text-blue-500">
-                    <CheckSquare size={16} />
-                  </button>
+                  {readOnly ? (
+                    <CheckSquare size={16} className="shrink-0 text-blue-500" />
+                  ) : (
+                    <button onClick={() => toggleTask(task.id, false)} className="shrink-0 text-blue-500">
+                      <CheckSquare size={16} />
+                    </button>
+                  )}
                   <span className="text-sm text-gray-500 flex-1 line-through">{task.title}</span>
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  {!readOnly && (
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
                 </div>
               ))}
             </>

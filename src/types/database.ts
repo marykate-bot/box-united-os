@@ -1,6 +1,7 @@
 export type RockStatus = 'on-track' | 'off-track' | 'done'
 export type TaskFrequency = 'daily' | 'weekly' | 'monthly'
 export type TeamTaskStatus = 'todo' | 'in-progress' | 'done'
+export type GoalStatus = 'not-started' | 'in-progress' | 'on-track' | 'done'
 
 export interface Profile {
   id: string
@@ -47,6 +48,19 @@ export interface TeamTask {
   assignee?: Profile
 }
 
+export interface AnnualGoal {
+  id: string
+  title: string
+  description: string | null
+  status: GoalStatus
+  year: number
+  owner_id: string | null
+  created_by: string
+  created_at: string
+  owner?: Profile | null
+  creator?: Profile
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -69,6 +83,11 @@ export interface Database {
         Row: TeamTask
         Insert: Omit<TeamTask, 'id' | 'created_at'>
         Update: Partial<Omit<TeamTask, 'id' | 'created_at'>>
+      }
+      annual_goals: {
+        Row: AnnualGoal
+        Insert: Omit<AnnualGoal, 'id' | 'created_at' | 'owner' | 'creator'>
+        Update: Partial<Omit<AnnualGoal, 'id' | 'created_at' | 'owner' | 'creator'>>
       }
     }
   }

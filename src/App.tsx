@@ -1,15 +1,33 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { LoginPage } from './components/auth/LoginPage'
 import { Sidebar } from './components/layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
 import { TeamBoard } from './components/team/TeamBoard'
+import { AnnualGoals } from './pages/AnnualGoals'
+import { supabase } from './lib/supabase'
+import type { Profile } from './types/database'
 
-type Page = 'dashboard' | 'team'
+type Page = 'dashboard' | 'team' | 'annual-goals'
 
 export default function App() {
   const { user, profile, loading, signInWithGoogle, signOut } = useAuth()
   const [page, setPage] = useState<Page>('dashboard')
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null)
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([])
+
+  // Effective viewing user — null means "own dashboard"
+  const effectiveViewingUserId = viewingUserId ?? user?.id ?? ''
+
+  // Fetch all profiles for AnnualGoals owner picker
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('profiles')
+      .select('*')
+      .order('full_name', { ascending: true })
+      .then(({ data }) => setAllProfiles(data ?? []))
+  }, [user?.id])
 
   if (loading) {
     return (
@@ -31,21 +49,41 @@ export default function App() {
     return <LoginPage onSignIn={signInWithGoogle} />
   }
 
+  function handleSelectUser(uid: string) {
+    setViewingUserId(uid === user!.id ? null : uid)
+    setPage('dashboard')
+  }
+
+  function handleNavigate(p: Page) {
+    setPage(p)
+    // When navigating away from dashboard, reset viewing user
+    if (p !== 'dashboard') setViewingUserId(null)
+  }
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: '#EEF2F7' }}>
       <Sidebar
         profile={profile}
         activePage={page}
-        onNavigate={setPage}
+        onNavigate={handleNavigate}
         onSignOut={signOut}
+        loggedInUserId={user.id}
+        viewingUserId={effectiveViewingUserId}
+        onSelectUser={handleSelectUser}
       />
 
       <main className="flex-1 overflow-hidden flex flex-col">
         {page === 'dashboard' && profile ? (
-          <Dashboard profile={profile} />
+          <Dashboard
+            loggedInProfile={profile}
+            viewingUserId={effectiveViewingUserId}
+          />
         ) : page === 'team' ? (
-          <TeamBoard
-            currentUserId={user.id}
+          <TeamBoard currentUserId={user.id} />
+        ) : page === 'annual-goals' ? (
+          <AnnualGoals
+            loggedInUserId={user.id}
+            profiles={allProfiles}
           />
         ) : null}
       </main>

@@ -9,6 +9,7 @@ interface Props {
   onUpdateStatus: (id: string, status: RockStatus) => void
   onDelete: (id: string) => void
   loading: boolean
+  readOnly?: boolean
 }
 
 const STATUS_LABELS: Record<RockStatus, string> = {
@@ -19,11 +20,11 @@ const STATUS_LABELS: Record<RockStatus, string> = {
 
 const STATUS_OPTIONS: RockStatus[] = ['on-track', 'off-track', 'done']
 
-export function RocksBoard({ rocks, currentQuarter, onAdd, onUpdateStatus, onDelete, loading }: Props) {
+export function RocksBoard({ rocks, currentQuarter, onAdd, onUpdateStatus, onDelete, loading, readOnly = false }: Props) {
   const [showAdd, setShowAdd] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newDesc, setNewDesc] = useState('')
-  const canAdd = rocks.length < 3
+  const canAdd = !readOnly && rocks.length < 3
 
   function handleAdd() {
     if (!newTitle.trim()) return
@@ -113,23 +114,31 @@ export function RocksBoard({ rocks, currentQuarter, onAdd, onUpdateStatus, onDel
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <select
-                    value={rock.status}
-                    onChange={e => onUpdateStatus(rock.id, e.target.value as RockStatus)}
-                    className={`status-pill ${rock.status} cursor-pointer outline-none border-none bg-transparent text-xs font-medium`}
-                  >
-                    {STATUS_OPTIONS.map(s => (
-                      <option key={s} value={s} className="text-gray-800 bg-white">
-                        {STATUS_LABELS[s]}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => onDelete(rock.id)}
-                    className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all text-xs"
-                  >
-                    ×
-                  </button>
+                  {readOnly ? (
+                    <span className={`status-pill ${rock.status} text-xs font-medium`}>
+                      {STATUS_LABELS[rock.status]}
+                    </span>
+                  ) : (
+                    <select
+                      value={rock.status}
+                      onChange={e => onUpdateStatus(rock.id, e.target.value as RockStatus)}
+                      className={`status-pill ${rock.status} cursor-pointer outline-none border-none bg-transparent text-xs font-medium`}
+                    >
+                      {STATUS_OPTIONS.map(s => (
+                        <option key={s} value={s} className="text-gray-800 bg-white">
+                          {STATUS_LABELS[s]}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {!readOnly && (
+                    <button
+                      onClick={() => onDelete(rock.id)}
+                      className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all text-xs"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

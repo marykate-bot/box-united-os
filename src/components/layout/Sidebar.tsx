@@ -1,22 +1,77 @@
-import { LayoutDashboard, Users, LogOut, Dumbbell } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { LayoutDashboard, Users, LogOut, Dumbbell, Target } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import type { Profile } from '../../types/database'
+
+type Page = 'dashboard' | 'team' | 'annual-goals'
 
 interface Props {
   profile: Profile | null
-  activePage: 'dashboard' | 'team'
-  onNavigate: (page: 'dashboard' | 'team') => void
+  activePage: Page
+  onNavigate: (page: Page) => void
   onSignOut: () => void
+  loggedInUserId: string
+  viewingUserId: string
+  onSelectUser: (userId: string) => void
 }
 
-const navItems = [
-  { id: 'dashboard' as const, label: 'My Dashboard', icon: LayoutDashboard },
-  { id: 'team' as const, label: 'Team Board', icon: Users },
+const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: 'dashboard',     label: 'My Dashboard', icon: LayoutDashboard },
+  { id: 'team',          label: 'Team Board',   icon: Users },
+  { id: 'annual-goals',  label: 'Annual Goals', icon: Target },
 ]
 
-export function Sidebar({ profile, activePage, onNavigate, onSignOut }: Props) {
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-    : profile?.email?.[0]?.toUpperCase() ?? '?'
+// Hardcoded fallback team members (for Claire & Alexandra before they sign up)
+const FALLBACK_OTHERS = [
+  { name: 'Claire',    initials: 'CL' },
+  { name: 'Alexandra', initials: 'AL' },
+]
+
+function avatarInitials(profile: Profile) {
+  if (profile.full_name) {
+    return profile.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  }
+  return profile.email[0]?.toUpperCase() ?? '?'
+}
+
+export function Sidebar({
+  profile,
+  activePage,
+  onNavigate,
+  onSignOut,
+  loggedInUserId,
+  viewingUserId,
+  onSelectUser,
+}: Props) {
+  const [otherProfiles, setOtherProfiles] = useState<Profile[]>([])
+
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('*')
+      .neq('id', loggedInUserId)
+      .order('full_name', { ascending: true })
+      .then(({ data }) => setOtherProfiles(data ?? []))
+  }, [loggedInUserId])
+
+  // Build the display list for other team members (2 slots with fallback)
+  const displayOthers: Array<{ id: string | null; name: string; initials: string; avatarUrl: string | null }> =
+    FALLBACK_OTHERS.map(placeholder => {
+      const real = otherProfiles.find(p =>
+        (p.full_name ?? '').toLowerCase().startsWith(placeholder.name.toLowerCase())
+      )
+      if (real) {
+        return {
+          id: real.id,
+          name: real.full_name ?? real.email,
+          initials: avatarInitials(real),
+          avatarUrl: real.avatar_url,
+        }
+      }
+      return { id: null, name: placeholder.name, initials: placeholder.initials, avatarUrl: null }
+    })
+
+  const selfInitials = profile ? avatarInitials(profile) : '?'
 
   return (
     <aside
@@ -35,6 +90,81 @@ export function Sidebar({ profile, activePage, onNavigate, onSignOut }: Props) {
             </p>
             <p className="text-blue-300 text-xs mt-0.5">Operations</p>
           </div>
+        </div>
+      </div>
+
+      {/* Team switcher */}
+      <div className="px-4 py-4 border-b border-white/10">
+        <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-3 px-1">Team</p>
+        <div className="flex items-center gap-2">
+          {/* Self */}
+          <button
+            onClick={() => onSelectUser(loggedInUserId)}
+            title={profile?.full_name ?? profile?.email ?? 'Me'}
+            className="relative shrink-0"
+          >
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="w-9 h-9 rounded-full object-cover transition-all"
+                style={{
+                  outline: viewingUserId === loggedInUserId ? '2px solid #2563EB' : '2px solid transparent',
+                  outlineOffset: '2px',
+                }}
+              />
+            ) : (
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white transition-all"
+                style={{
+                  background: viewingUserId === loggedInUserId ? '#2563EB' : '#1e3a5f',
+                  outline: viewingUserId === loggedInUserId ? '2px solid #2563EB' : '2px solid transparent',
+                  outlineOffset: '2px',
+                }}
+              >
+                {selfInitials}
+              </div>
+            )}
+          </button>
+
+          {/* Other team members */}
+          {displayOthers.map((member, i) => {
+            const isViewing = member.id !== null && viewingUserId === member.id
+            return (
+              <button
+                key={member.id ?? `placeholder-${i}`}
+                onClick={() => member.id ? onSelectUser(member.id) : undefined}
+                title={member.name}
+                disabled={member.id === null}
+                className="relative shrink-0"
+                style={{ cursor: member.id ? 'pointer' : 'default' }}
+              >
+                {member.avatarUrl ? (
+                  <img
+                    src={member.avatarUrl}
+                    alt=""
+                    className="w-9 h-9 rounded-full object-cover"
+                    style={{
+                      outline: isViewing ? '2px solid #2563EB' : '2px solid transparent',
+                      outlineOffset: '2px',
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white/60 transition-all"
+                    style={{
+                      background: isViewing ? '#1e3a5f' : 'rgba(255,255,255,0.08)',
+                      outline: isViewing ? '2px solid #2563EB' : '2px solid transparent',
+                      outlineOffset: '2px',
+                      opacity: member.id === null ? 0.4 : 1,
+                    }}
+                  >
+                    {member.initials}
+                  </div>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -70,7 +200,7 @@ export function Sidebar({ profile, activePage, onNavigate, onSignOut }: Props) {
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
               style={{ background: '#2563EB' }}
             >
-              {initials}
+              {selfInitials}
             </div>
           )}
           <div className="min-w-0">
