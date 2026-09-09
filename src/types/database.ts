@@ -61,6 +61,39 @@ export interface AnnualGoal {
   creator?: Profile
 }
 
+export type MetricKey = 'students' | 'schools' | 'dollars_raised'
+
+export interface ScorecardMetric {
+  id: string
+  year: number
+  metric_key: MetricKey
+  target: number | null
+  actual: number | null
+  updated_by: string | null
+  updated_at: string
+}
+
+export interface Decision {
+  id: string
+  title: string
+  context: string | null
+  decided_by: string | null
+  decided_at: string
+  created_by: string
+  created_at: string
+  decider?: Profile | null
+}
+
+export interface MeetingTopic {
+  id: string
+  text: string
+  added_by: string | null
+  done: boolean
+  sort_order: number
+  created_at: string
+  adder?: Profile | null
+}
+
 export interface Database {
   public: {
     Tables: {

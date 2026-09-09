@@ -5,10 +5,12 @@ import { Sidebar } from './components/layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
 import { TeamBoard } from './components/team/TeamBoard'
 import { AnnualGoals } from './pages/AnnualGoals'
+import { DecisionLog } from './pages/DecisionLog'
+import { TeamMeeting } from './pages/TeamMeeting'
 import { supabase } from './lib/supabase'
 import type { Profile } from './types/database'
 
-type Page = 'dashboard' | 'team' | 'annual-goals'
+type Page = 'dashboard' | 'team' | 'annual-goals' | 'decisions' | 'team-meeting'
 
 export default function App() {
   const { user, profile, loading, signInWithGoogle, signOut } = useAuth()
@@ -54,8 +56,8 @@ export default function App() {
     setPage('dashboard')
   }
 
-  function handleNavigate(p: Page) {
-    setPage(p)
+  function handleNavigate(p: string) {
+    setPage(p as Page)
     // When navigating away from dashboard, reset viewing user
     if (p !== 'dashboard') setViewingUserId(null)
   }
@@ -85,6 +87,10 @@ export default function App() {
             loggedInUserId={user.id}
             profiles={allProfiles}
           />
+        ) : page === 'decisions' ? (
+          <DecisionLog loggedInUserId={user.id} profiles={allProfiles} />
+        ) : page === 'team-meeting' ? (
+          <TeamMeeting loggedInUserId={user.id} profiles={allProfiles} />
         ) : null}
       </main>
     </div>

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Users, LogOut, Dumbbell, Target } from 'lucide-react'
+import { LayoutDashboard, Users, LogOut, Dumbbell, Target, BookOpen, ClipboardList } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import type { Profile } from '../../types/database'
 
-type Page = 'dashboard' | 'team' | 'annual-goals'
+type Page = string
 
 interface Props {
   profile: Profile | null
@@ -15,10 +15,12 @@ interface Props {
   onSelectUser: (userId: string) => void
 }
 
-const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard',     label: 'My Dashboard', icon: LayoutDashboard },
-  { id: 'team',          label: 'Team Board',   icon: Users },
-  { id: 'annual-goals',  label: 'Annual Goals', icon: Target },
+const navItems: { id: string; label: string; icon: typeof LayoutDashboard }[] = [
+  { id: 'dashboard',    label: 'My Dashboard',  icon: LayoutDashboard },
+  { id: 'team',         label: 'Team Board',    icon: Users },
+  { id: 'annual-goals', label: 'Scorecard',     icon: Target },
+  { id: 'decisions',    label: 'Decision Log',  icon: BookOpen },
+  { id: 'team-meeting', label: 'Team Meeting',  icon: ClipboardList },
 ]
 
 // Hardcoded fallback team members (for Claire & Alexandra before they sign up)
