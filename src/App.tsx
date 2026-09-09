@@ -4,13 +4,13 @@ import { LoginPage } from './components/auth/LoginPage'
 import { Sidebar } from './components/layout/Sidebar'
 import { Dashboard } from './pages/Dashboard'
 import { TeamBoard } from './components/team/TeamBoard'
-import { AnnualGoals } from './pages/AnnualGoals'
+import { Scorecard } from './pages/AnnualGoals'
 import { DecisionLog } from './pages/DecisionLog'
 import { TeamMeeting } from './pages/TeamMeeting'
 import { supabase } from './lib/supabase'
 import type { Profile } from './types/database'
 
-type Page = 'dashboard' | 'team' | 'annual-goals' | 'decisions' | 'team-meeting'
+type Page = 'dashboard' | 'team' | 'scorecard' | 'decisions' | 'meeting'
 
 export default function App() {
   const { user, profile, loading, signInWithGoogle, signOut } = useAuth()
@@ -21,7 +21,7 @@ export default function App() {
   // Effective viewing user — null means "own dashboard"
   const effectiveViewingUserId = viewingUserId ?? user?.id ?? ''
 
-  // Fetch all profiles for AnnualGoals owner picker
+  // Fetch all profiles for owner/person pickers
   useEffect(() => {
     if (!user) return
     supabase
@@ -82,15 +82,21 @@ export default function App() {
           />
         ) : page === 'team' ? (
           <TeamBoard currentUserId={user.id} />
-        ) : page === 'annual-goals' ? (
-          <AnnualGoals
+        ) : page === 'scorecard' ? (
+          <Scorecard
             loggedInUserId={user.id}
             profiles={allProfiles}
           />
         ) : page === 'decisions' ? (
-          <DecisionLog loggedInUserId={user.id} profiles={allProfiles} />
-        ) : page === 'team-meeting' ? (
-          <TeamMeeting loggedInUserId={user.id} profiles={allProfiles} />
+          <DecisionLog
+            loggedInUserId={user.id}
+            profiles={allProfiles}
+          />
+        ) : page === 'meeting' ? (
+          <TeamMeeting
+            loggedInUserId={user.id}
+            profiles={allProfiles}
+          />
         ) : null}
       </main>
     </div>

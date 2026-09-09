@@ -16,11 +16,11 @@ interface Props {
 }
 
 const navItems: { id: string; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard',    label: 'My Dashboard',  icon: LayoutDashboard },
-  { id: 'team',         label: 'Team Board',    icon: Users },
-  { id: 'annual-goals', label: 'Scorecard',     icon: Target },
-  { id: 'decisions',    label: 'Decision Log',  icon: BookOpen },
-  { id: 'team-meeting', label: 'Team Meeting',  icon: ClipboardList },
+  { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
+  { id: 'team',      label: 'Team Board',   icon: Users },
+  { id: 'scorecard', label: 'Scorecard',    icon: Target },
+  { id: 'decisions', label: 'Decision Log', icon: BookOpen },
+  { id: 'meeting',   label: 'Team Meeting', icon: ClipboardList },
 ]
 
 // Hardcoded fallback team members (for Claire & Alexandra before they sign up)

@@ -231,7 +231,7 @@ function MetricCard({ metricKey, metric, onUpdate }: MetricCardProps) {
   )
 }
 
-export function AnnualGoals({ loggedInUserId, profiles }: Props) {
+export function Scorecard({ loggedInUserId, profiles }: Props) {
   const [year, setYear] = useState(CURRENT_YEAR)
   const { goals, loading: goalsLoading, addGoal, updateGoalStatus, deleteGoal } = useAnnualGoals(year, loggedInUserId)
   const { metrics, loading: metricsLoading, updateMetric } = useScorecardMetrics(year, loggedInUserId)
